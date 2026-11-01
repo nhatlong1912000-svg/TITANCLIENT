@@ -19,6 +19,7 @@ public final class TitanClient implements ClientModInitializer {
     private static boolean performanceMode;
     private static boolean sprintToggle;
     private static boolean originalSaved;
+    private static boolean warnedForMultiplayer;
     private static int previousRenderDistance;
 
     @Override
@@ -34,11 +35,31 @@ public final class TitanClient implements ClientModInitializer {
             GLFW.GLFW_KEY_G, CATEGORY));
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
+            boolean multiplayer = client.getConnection() != null && !client.hasSingleplayerServer();
+            if (!multiplayer) {
+                warnedForMultiplayer = false;
+            } else {
+                if (!warnedForMultiplayer) {
+                    notifyPlayer(client, "TITAN SAFETY: Multiplayer detected. Use only server-approved features.");
+                    warnedForMultiplayer = true;
+                }
+                if (sprintToggle) {
+                    sprintToggle = false;
+                    notifyPlayer(client, "TITAN SAFETY: Toggle Sprint auto-disabled in multiplayer.");
+                }
+            }
+
             while (openGuiKey.consumeClick()) {
                 if (client.screen == null) client.setScreen(new TitanClickGui());
             }
             while (performanceKey.consumeClick()) togglePerformanceMode(client);
-            while (sprintToggleKey.consumeClick()) setSprintToggle(!sprintToggle, client);
+            while (sprintToggleKey.consumeClick()) {
+                if (multiplayer) {
+                    notifyPlayer(client, "TITAN SAFETY: Toggle Sprint is restricted to singleplayer.");
+                } else {
+                    setSprintToggle(!sprintToggle, client);
+                }
+            }
             if (sprintToggle && client.player != null && client.screen == null
                 && !client.player.isFallFlying() && !client.player.isPassenger()
                 && !client.player.isCrouching() && client.player.getFoodData().getFoodLevel() > 6) {
@@ -48,6 +69,11 @@ public final class TitanClient implements ClientModInitializer {
     }
 
     public static void setSprintToggle(boolean enabled, Minecraft client) {
+        if (enabled && client != null && client.getConnection() != null && !client.hasSingleplayerServer()) {
+            sprintToggle = false;
+            notifyPlayer(client, "TITAN SAFETY: Toggle Sprint is restricted to singleplayer.");
+            return;
+        }
         sprintToggle = enabled;
         notifyPlayer(client, "TITAN: Toggle Sprint " + (enabled ? "ON" : "OFF"));
     }

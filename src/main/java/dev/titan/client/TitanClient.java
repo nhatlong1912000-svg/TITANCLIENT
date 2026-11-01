@@ -5,7 +5,6 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.KeyMapping;
-import net.minecraft.client.ParticleStatus;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import org.lwjgl.glfw.GLFW;
@@ -17,7 +16,6 @@ public final class TitanClient implements ClientModInitializer {
     private KeyMapping performanceKey;
     private boolean performanceMode;
     private int previousRenderDistance;
-    private ParticleStatus previousParticles;
 
     @Override
     public void onInitializeClient() {
@@ -44,14 +42,11 @@ public final class TitanClient implements ClientModInitializer {
         if (client.options == null) return;
         if (!performanceMode) {
             previousRenderDistance = client.options.renderDistance().get();
-            previousParticles = client.options.particles().get();
             client.options.renderDistance().set(Math.min(previousRenderDistance, 6));
-            client.options.particles().set(ParticleStatus.MINIMAL);
             performanceMode = true;
-            client.player.displayClientMessage(Component.literal("TITAN: Performance mode ON"), true);
+            client.player.displayClientMessage(Component.literal("TITAN: Performance mode ON (render distance 6)"), true);
         } else {
             client.options.renderDistance().set(previousRenderDistance);
-            client.options.particles().set(previousParticles);
             performanceMode = false;
             client.player.displayClientMessage(Component.literal("TITAN: Performance mode OFF"), true);
         }

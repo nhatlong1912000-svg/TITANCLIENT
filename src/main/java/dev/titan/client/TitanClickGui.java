@@ -13,31 +13,41 @@ public final class TitanClickGui extends Screen {
 
     @Override
     protected void init() {
-        int buttonWidth = Math.min(220, Math.max(150, width - 32));
+        int buttonWidth = Math.min(220, Math.max(140, width - 24));
         int left = (width - buttonWidth) / 2;
-        int top = Math.max(55, height / 2 - 30);
+        int buttonHeight = 20;
+        int gap = 5;
+        int totalHeight = buttonHeight * 5 + gap * 4;
+        int top = Math.max(58, (height - totalHeight) / 2);
 
-        addRenderableWidget(Button.builder(performanceLabel(), button -> {
-            TitanClient.togglePerformanceMode(Minecraft.getInstance());
-            button.setMessage(performanceLabel());
-        }).bounds(left, top, buttonWidth, 20).build());
+        addRenderableWidget(Button.builder(Component.literal("ULTRA FPS  |  4 CHUNKS"),
+            button -> TitanClient.applyRenderPreset(Minecraft.getInstance(), 4))
+            .bounds(left, top, buttonWidth, buttonHeight).build());
 
-        addRenderableWidget(Button.builder(Component.literal("Close"), button -> onClose())
-            .bounds(left, top + 28, buttonWidth, 20).build());
-    }
+        addRenderableWidget(Button.builder(Component.literal("PERFORMANCE  |  6 CHUNKS"),
+            button -> TitanClient.applyRenderPreset(Minecraft.getInstance(), 6))
+            .bounds(left, top + 25, buttonWidth, buttonHeight).build());
 
-    private static Component performanceLabel() {
-        return Component.literal("Performance Mode: " +
-            (TitanClient.isPerformanceMode() ? "ON" : "OFF"));
+        addRenderableWidget(Button.builder(Component.literal("BALANCED  |  8 CHUNKS"),
+            button -> TitanClient.applyRenderPreset(Minecraft.getInstance(), 8))
+            .bounds(left, top + 50, buttonWidth, buttonHeight).build());
+
+        addRenderableWidget(Button.builder(Component.literal("RESTORE ORIGINAL"),
+            button -> TitanClient.restoreRenderDistance(Minecraft.getInstance()))
+            .bounds(left, top + 75, buttonWidth, buttonHeight).build());
+
+        addRenderableWidget(Button.builder(Component.literal("CLOSE"),
+            button -> onClose())
+            .bounds(left, top + 100, buttonWidth, buttonHeight).build());
     }
 
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         graphics.fill(0, 0, width, height, 0xE9101018);
-        graphics.fill(width / 2 - 118, 18, width / 2 + 118, 42, 0xFF7A1018);
-        graphics.drawCenteredString(font, "TITAN CLIENT", width / 2, 25, 0xFFFFFFFF);
-        graphics.drawCenteredString(font, "PC + PojavLauncher | Fabric 1.21.11",
-            width / 2, 46, 0xFFCCCCCC);
+        graphics.fill(width / 2 - 122, 14, width / 2 + 122, 39, 0xFF7A1018);
+        graphics.drawCenteredString(font, "TITAN CLIENT", width / 2, 22, 0xFFFFFFFF);
+        graphics.drawCenteredString(font, "PERFORMANCE PRESETS  |  FABRIC 1.21.11",
+            width / 2, 45, 0xFFCCCCCC);
         super.render(graphics, mouseX, mouseY, delta);
     }
 

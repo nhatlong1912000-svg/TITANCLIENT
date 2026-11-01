@@ -7,6 +7,7 @@ import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import org.lwjgl.glfw.GLFW;
 
 public final class TitanClient implements ClientModInitializer {
     private static final KeyMapping.Category CATEGORY =
@@ -17,7 +18,7 @@ public final class TitanClient implements ClientModInitializer {
     public void onInitializeClient() {
         openGuiKey = KeyBindingHelper.registerKeyBinding(new KeyMapping(
             "key.titanclient.open_gui", InputConstants.Type.KEYSYM,
-            InputConstants.KEY_RIGHT_SHIFT, CATEGORY
+            GLFW.GLFW_KEY_RIGHT_SHIFT, CATEGORY
         ));
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             while (openGuiKey.consumeClick()) {

@@ -41,7 +41,7 @@ public final class TitanClient implements ClientModInitializer {
             while (sprintToggleKey.consumeClick()) setSprintToggle(!sprintToggle, client);
             if (sprintToggle && client.player != null && client.screen == null
                 && !client.player.isFallFlying() && !client.player.isPassenger()
-                && !client.player.isCrouching() && client.player.getFoodData().hasFood()) {
+                && !client.player.isCrouching() && client.player.getFoodData().getFoodLevel() > 6) {
                 client.player.setSprinting(true);
             }
         });

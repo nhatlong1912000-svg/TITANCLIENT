@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "id": "titanclient",
+  "version": "${version}",
+  "name": "TITAN CLIENT",
+  "description": "Client-side utility and HUD starter mod.",
+  "authors": ["TITAN Team"],
+  "environment": "client",
+  "entrypoints": { "client": ["dev.titan.client.TitanClient"] },
+  "depends": {
+    "fabricloader": ">=0.18.1",
+    "minecraft": "1.21.11",
+    "java": ">=21",
+    "fabric-api": "*"
+  }
+}

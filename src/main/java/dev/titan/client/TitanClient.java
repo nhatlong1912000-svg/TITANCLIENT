@@ -34,6 +34,8 @@ public final class TitanClient implements ClientModInitializer {
             "key.titanclient.toggle_sprint", InputConstants.Type.KEYSYM,
             GLFW.GLFW_KEY_G, CATEGORY));
 
+        TitanModules.registerHud();
+
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             boolean multiplayer = client.getConnection() != null && !client.hasSingleplayerServer();
             if (!multiplayer) {

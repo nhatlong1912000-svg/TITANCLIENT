@@ -15,7 +15,9 @@ public final class TitanClient implements ClientModInitializer {
         KeyMapping.Category.register(Identifier.fromNamespaceAndPath("titanclient", "main"));
     private static KeyMapping openGuiKey;
     private static KeyMapping performanceKey;
+    private static KeyMapping sprintToggleKey;
     private static boolean performanceMode;
+    private static boolean sprintToggle;
     private static boolean originalSaved;
     private static int previousRenderDistance;
 
@@ -23,22 +25,34 @@ public final class TitanClient implements ClientModInitializer {
     public void onInitializeClient() {
         openGuiKey = KeyBindingHelper.registerKeyBinding(new KeyMapping(
             "key.titanclient.open_gui", InputConstants.Type.KEYSYM,
-            GLFW.GLFW_KEY_RIGHT_SHIFT, CATEGORY
-        ));
+            GLFW.GLFW_KEY_RIGHT_SHIFT, CATEGORY));
         performanceKey = KeyBindingHelper.registerKeyBinding(new KeyMapping(
             "key.titanclient.performance", InputConstants.Type.KEYSYM,
-            GLFW.GLFW_KEY_P, CATEGORY
-        ));
+            GLFW.GLFW_KEY_P, CATEGORY));
+        sprintToggleKey = KeyBindingHelper.registerKeyBinding(new KeyMapping(
+            "key.titanclient.toggle_sprint", InputConstants.Type.KEYSYM,
+            GLFW.GLFW_KEY_G, CATEGORY));
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             while (openGuiKey.consumeClick()) {
                 if (client.screen == null) client.setScreen(new TitanClickGui());
             }
-            while (performanceKey.consumeClick()) {
-                togglePerformanceMode(client);
+            while (performanceKey.consumeClick()) togglePerformanceMode(client);
+            while (sprintToggleKey.consumeClick()) setSprintToggle(!sprintToggle, client);
+            if (sprintToggle && client.player != null && client.screen == null
+                && !client.player.isFallFlying() && !client.player.isPassenger()
+                && !client.player.isCrouching() && client.player.getFoodData().hasFood()) {
+                client.player.setSprinting(true);
             }
         });
     }
+
+    public static void setSprintToggle(boolean enabled, Minecraft client) {
+        sprintToggle = enabled;
+        notifyPlayer(client, "TITAN: Toggle Sprint " + (enabled ? "ON" : "OFF"));
+    }
+
+    public static boolean isSprintToggle() { return sprintToggle; }
 
     public static void applyRenderPreset(Minecraft client, int chunks) {
         if (client == null || client.options == null) return;
@@ -64,21 +78,14 @@ public final class TitanClient implements ClientModInitializer {
     }
 
     public static void togglePerformanceMode(Minecraft client) {
-        if (performanceMode) {
-            restoreRenderDistance(client);
-        } else {
-            applyRenderPreset(client, 6);
-            notifyPlayer(client, "TITAN: Performance Mode ON");
-        }
+        if (performanceMode) restoreRenderDistance(client);
+        else applyRenderPreset(client, 6);
     }
 
     private static void notifyPlayer(Minecraft client, String message) {
-        if (client.player != null) {
+        if (client != null && client.player != null)
             client.player.displayClientMessage(Component.literal(message), true);
-        }
     }
 
-    public static boolean isPerformanceMode() {
-        return performanceMode;
-    }
+    public static boolean isPerformanceMode() { return performanceMode; }
 }

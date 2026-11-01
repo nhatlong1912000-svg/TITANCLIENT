@@ -7,48 +7,87 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
 public final class TitanClickGui extends Screen {
+    private enum Page { PERFORMANCE, HUD, VISUAL, UTILITY }
+    private Page page = Page.PERFORMANCE;
+
     public TitanClickGui() {
         super(Component.literal("TITAN CLIENT"));
     }
 
     @Override
     protected void init() {
-        int buttonWidth = Math.min(220, Math.max(140, width - 24));
-        int left = (width - buttonWidth) / 2;
-        int buttonHeight = 20;
-        int gap = 5;
-        int totalHeight = buttonHeight * 5 + gap * 4;
-        int top = Math.max(58, (height - totalHeight) / 2);
+        clearWidgets();
+        int panelWidth = Math.min(390, width - 16);
+        int panelHeight = Math.min(250, height - 20);
+        int left = (width - panelWidth) / 2;
+        int top = (height - panelHeight) / 2;
+        int sideWidth = Math.max(76, Math.min(104, panelWidth / 3));
+        int contentLeft = left + sideWidth + 10;
+        int contentWidth = panelWidth - sideWidth - 20;
 
-        addRenderableWidget(Button.builder(Component.literal("ULTRA FPS  |  4 CHUNKS"),
-            button -> TitanClient.applyRenderPreset(Minecraft.getInstance(), 4))
-            .bounds(left, top, buttonWidth, buttonHeight).build());
+        addRenderableWidget(tab("PERF", Page.PERFORMANCE, left + 6, top + 43, sideWidth - 12));
+        addRenderableWidget(tab("HUD", Page.HUD, left + 6, top + 69, sideWidth - 12));
+        addRenderableWidget(tab("VISUAL", Page.VISUAL, left + 6, top + 95, sideWidth - 12));
+        addRenderableWidget(tab("UTILITY", Page.UTILITY, left + 6, top + 121, sideWidth - 12));
 
-        addRenderableWidget(Button.builder(Component.literal("PERFORMANCE  |  6 CHUNKS"),
-            button -> TitanClient.applyRenderPreset(Minecraft.getInstance(), 6))
-            .bounds(left, top + 25, buttonWidth, buttonHeight).build());
+        if (page == Page.PERFORMANCE) {
+            addRenderableWidget(action("ULTRA FPS  ·  4 CHUNKS", contentLeft, top + 48,
+                contentWidth, () -> TitanClient.applyRenderPreset(Minecraft.getInstance(), 4)));
+            addRenderableWidget(action("PERFORMANCE  ·  6 CHUNKS", contentLeft, top + 76,
+                contentWidth, () -> TitanClient.applyRenderPreset(Minecraft.getInstance(), 6)));
+            addRenderableWidget(action("BALANCED  ·  8 CHUNKS", contentLeft, top + 104,
+                contentWidth, () -> TitanClient.applyRenderPreset(Minecraft.getInstance(), 8)));
+            addRenderableWidget(action("RESTORE ORIGINAL", contentLeft, top + 132,
+                contentWidth, () -> TitanClient.restoreRenderDistance(Minecraft.getInstance())));
+        } else {
+            String[] labels = switch (page) {
+                case HUD -> new String[] {"FPS COUNTER", "COORDINATES HUD", "KEYSTROKES", "ARMOR HUD"};
+                case VISUAL -> new String[] {"CUSTOM CROSSHAIR", "ZOOM", "FULLBRIGHT", "DAMAGE TINT"};
+                case UTILITY -> new String[] {"TOGGLE SPRINT", "WAYPOINTS", "SCREENSHOT MANAGER", "MODULE SEARCH"};
+                default -> new String[0];
+            };
+            for (int i = 0; i < labels.length; i++) {
+                final int index = i;
+                addRenderableWidget(Button.builder(Component.literal(labels[i] + "  ·  COMING SOON"),
+                    b -> {}).bounds(contentLeft, top + 48 + i * 28, contentWidth, 20)
+                    .build());
+            }
+        }
 
-        addRenderableWidget(Button.builder(Component.literal("BALANCED  |  8 CHUNKS"),
-            button -> TitanClient.applyRenderPreset(Minecraft.getInstance(), 8))
-            .bounds(left, top + 50, buttonWidth, buttonHeight).build());
+        addRenderableWidget(action("CLOSE", contentLeft, top + panelHeight - 31,
+            contentWidth, this::onClose));
+    }
 
-        addRenderableWidget(Button.builder(Component.literal("RESTORE ORIGINAL"),
-            button -> TitanClient.restoreRenderDistance(Minecraft.getInstance()))
-            .bounds(left, top + 75, buttonWidth, buttonHeight).build());
+    private Button tab(String label, Page target, int x, int y, int w) {
+        String shown = page == target ? "› " + label : label;
+        return Button.builder(Component.literal(shown), b -> {
+            page = target;
+            rebuildWidgets();
+        }).bounds(x, y, w, 20).build();
+    }
 
-        addRenderableWidget(Button.builder(Component.literal("CLOSE"),
-            button -> onClose())
-            .bounds(left, top + 100, buttonWidth, buttonHeight).build());
+    private Button action(String label, int x, int y, int w, Runnable task) {
+        return Button.builder(Component.literal(label), b -> task.run())
+            .bounds(x, y, w, 20).build();
     }
 
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
-        graphics.fill(0, 0, width, height, 0xE9101018);
-        graphics.fill(width / 2 - 122, 14, width / 2 + 122, 39, 0xFF7A1018);
-        graphics.drawCenteredString(font, "TITAN CLIENT", width / 2, 22, 0xFFFFFFFF);
-        graphics.drawCenteredString(font, "PERFORMANCE PRESETS  |  FABRIC 1.21.11",
-            width / 2, 45, 0xFFCCCCCC);
-        super.render(graphics, mouseX, mouseY, delta);
+    public void render(GuiGraphics g, int mouseX, int mouseY, float delta) {
+        int panelWidth = Math.min(390, width - 16);
+        int panelHeight = Math.min(250, height - 20);
+        int left = (width - panelWidth) / 2;
+        int top = (height - panelHeight) / 2;
+        int sideWidth = Math.max(76, Math.min(104, panelWidth / 3));
+
+        g.fill(0, 0, width, height, 0x99000000);
+        g.fill(left, top, left + panelWidth, top + panelHeight, 0xF014151B);
+        g.fill(left, top, left + panelWidth, top + 29, 0xFF861322);
+        g.fill(left, top + 29, left + sideWidth, top + panelHeight, 0xFF1B1C24);
+        g.fill(left + sideWidth, top + 29, left + sideWidth + 1, top + panelHeight, 0xFF8C1B2B);
+        g.drawString(font, "TITAN CLIENT", left + 10, top + 10, 0xFFFFFFFF, false);
+        g.drawString(font, page.name(), left + sideWidth + 12, top + 37, 0xFFFF6677, false);
+        g.drawString(font, "MODS  /  1.21.11", left + 9, top + panelHeight - 17, 0xFF888A96, false);
+        super.render(g, mouseX, mouseY, delta);
     }
 
     @Override

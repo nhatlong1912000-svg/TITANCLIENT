@@ -39,11 +39,24 @@ public final class TitanClickGui extends Screen {
                 contentWidth, () -> TitanClient.applyRenderPreset(Minecraft.getInstance(), 8)));
             addRenderableWidget(action("RESTORE ORIGINAL", contentLeft, top + 132,
                 contentWidth, () -> TitanClient.restoreRenderDistance(Minecraft.getInstance())));
+        } else if (page == Page.UTILITY) {
+            addRenderableWidget(action("TOGGLE SPRINT: " + (TitanClient.isSprintToggle() ? "ON" : "OFF"),
+                contentLeft, top + 48, contentWidth,
+                () -> {
+                    TitanClient.setSprintToggle(!TitanClient.isSprintToggle(), Minecraft.getInstance());
+                    rebuildWidgets();
+                }));
+            addRenderableWidget(Button.builder(Component.literal("WAYPOINTS  ·  COMING SOON"), b -> {})
+                .bounds(contentLeft, top + 76, contentWidth, 20).build());
+            addRenderableWidget(Button.builder(Component.literal("SCREENSHOT MANAGER  ·  COMING SOON"), b -> {})
+                .bounds(contentLeft, top + 104, contentWidth, 20).build());
+            addRenderableWidget(Button.builder(Component.literal("MODULE SEARCH  ·  COMING SOON"), b -> {})
+                .bounds(contentLeft, top + 132, contentWidth, 20).build());
         } else {
             String[] labels = switch (page) {
                 case HUD -> new String[] {"FPS COUNTER", "COORDINATES HUD", "KEYSTROKES", "ARMOR HUD"};
                 case VISUAL -> new String[] {"CUSTOM CROSSHAIR", "ZOOM", "FULLBRIGHT", "DAMAGE TINT"};
-                case UTILITY -> new String[] {"TOGGLE SPRINT", "WAYPOINTS", "SCREENSHOT MANAGER", "MODULE SEARCH"};
+                case UTILITY -> new String[] {"WAYPOINTS", "SCREENSHOT MANAGER", "MODULE SEARCH"};
                 default -> new String[0];
             };
             for (int i = 0; i < labels.length; i++) {

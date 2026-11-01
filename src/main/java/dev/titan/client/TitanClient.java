@@ -16,6 +16,7 @@ public final class TitanClient implements ClientModInitializer {
     private static KeyMapping openGuiKey;
     private static KeyMapping performanceKey;
     private static boolean performanceMode;
+    private static boolean originalSaved;
     private static int previousRenderDistance;
 
     @Override
@@ -39,24 +40,45 @@ public final class TitanClient implements ClientModInitializer {
         });
     }
 
-    public static void togglePerformanceMode(Minecraft client) {
+    public static void applyRenderPreset(Minecraft client, int chunks) {
         if (client == null || client.options == null) return;
-        if (!performanceMode) {
+        if (!originalSaved) {
             previousRenderDistance = client.options.renderDistance().get();
-            client.options.renderDistance().set(Math.min(previousRenderDistance, 6));
-            performanceMode = true;
-            notifyPlayer(client, "TITAN: Performance mode ON - 6 chunks");
-        } else {
-            client.options.renderDistance().set(previousRenderDistance);
-            performanceMode = false;
-            notifyPlayer(client, "TITAN: Performance mode OFF");
+            originalSaved = true;
         }
+        client.options.renderDistance().set(chunks);
+        performanceMode = chunks <= 6;
         client.options.save();
+        notifyPlayer(client, "TITAN: Render distance set to " + chunks + " chunks");
+    }
+
+    public static void restoreRenderDistance(Minecraft client) {
+        if (client == null || client.options == null) return;
+        if (originalSaved) {
+            client.options.renderDistance().set(previousRenderDistance);
+            client.options.save();
+            originalSaved = false;
+        }
+        performanceMode = false;
+        notifyPlayer(client, "TITAN: Original render distance restored");
+    }
+
+    public static void togglePerformanceMode(Minecraft client) {
+        if (performanceMode) {
+            restoreRenderDistance(client);
+        } else {
+            applyRenderPreset(client, 6);
+            notifyPlayer(client, "TITAN: Performance Mode ON");
+        }
     }
 
     private static void notifyPlayer(Minecraft client, String message) {
-        if (client.player != null) client.player.displayClientMessage(Component.literal(message), true);
+        if (client.player != null) {
+            client.player.displayClientMessage(Component.literal(message), true);
+        }
     }
 
-    public static boolean isPerformanceMode() { return performanceMode; }
+    public static boolean isPerformanceMode() {
+        return performanceMode;
+    }
 }

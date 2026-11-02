@@ -1,15 +1,25 @@
 package dev.titan.client;
 
 import java.util.List;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
 public final class TitanClickGui extends Screen {
-    private enum Page { PERFORMANCE, HUD, VISUAL, UTILITY }
+    private enum Page {
+        HUD("HUD"), VISUAL("VISUAL"), PERFORMANCE("PERFORMANCE"), UTILITY("UTILITY");
+        final String label;
+        Page(String label) { this.label = label; }
+    }
+
     private Page page = Page.HUD;
+    private int scroll;
+    private static final int RED = 0xFFFF2948;
+    private static final int PANEL = 0xF0101118;
+    private static final int CARD = 0xFF191A22;
+    private static final int MUTED = 0xFF9699A6;
 
     public TitanClickGui() {
         super(Component.literal("TITAN CLIENT"));
@@ -17,75 +27,125 @@ public final class TitanClickGui extends Screen {
 
     @Override
     protected void init() {
-        clearWidgets();
-        int panelWidth = Math.min(410, width - 16);
-        int panelHeight = Math.min(285, height - 16);
-        int left = (width - panelWidth) / 2;
-        int top = (height - panelHeight) / 2;
-        int sideWidth = 104;
-        int contentLeft = left + sideWidth + 12;
-        int contentWidth = panelWidth - sideWidth - 22;
+        // Drawn manually so the interface is consistent across desktop and touch layouts.
+    }
 
-        addRenderableWidget(tab("PERF", Page.PERFORMANCE, left + 6, top + 46, sideWidth - 12));
-        addRenderableWidget(tab("HUD", Page.HUD, left + 6, top + 73, sideWidth - 12));
-        addRenderableWidget(tab("VISUAL", Page.VISUAL, left + 6, top + 100, sideWidth - 12));
-        addRenderableWidget(tab("UTILITY", Page.UTILITY, left + 6, top + 127, sideWidth - 12));
+    private int panelWidth() { return Math.min(820, width - 20); }
+    private int panelHeight() { return Math.min(520, height - 20); }
+    private int left() { return (width - panelWidth()) / 2; }
+    private int top() { return (height - panelHeight()) / 2; }
+    private int sideWidth() { return Math.max(112, Math.min(154, panelWidth() / 4)); }
+    private int contentLeft() { return left() + sideWidth() + 18; }
+    private int contentWidth() { return panelWidth() - sideWidth() - 30; }
 
+    @Override
+    public void render(GuiGraphics g, int mouseX, int mouseY, float delta) {
+        g.fill(0, 0, width, height, 0x9905070D);
+        int x = left(), y = top(), w = panelWidth(), h = panelHeight(), side = sideWidth();
+        g.fill(x, y, x + w, y + h, PANEL);
+        g.fill(x, y, x + w, y + 5, RED);
+        g.fill(x, y, x + w, y + 76, 0xFF14151D);
+        g.fill(x, y + 75, x + w, y + 77, 0xFF54202C);
+        g.fill(x, y + 76, x + side, y + h, 0xFF12131A);
+        g.fill(x + side, y + 76, x + side + 1, y + h, 0xFF792033);
+
+        g.drawString(font, "✦", x + 18, y + 19, RED, false);
+        g.drawString(font, "TITAN CLIENT", x + 42, y + 17, 0xFFFFFFFF, false);
+        g.drawString(font, "BETTER  •  FASTER  •  STRONGER", x + 42, y + 37, 0xFFFF7183, false);
+        g.drawString(font, "24 MODULES", x + w - 104, y + 27, 0xFFB8BAC4, false);
+
+        Page[] pages = Page.values();
+        String[] labels = {"HUD", "VISUAL", "PERFORMANCE", "UTILITY"};
+        for (int i = 0; i < pages.length; i++) {
+            int ty = y + 102 + i * 48;
+            boolean active = page == pages[i];
+            if (active) {
+                g.fill(x + 9, ty - 8, x + side - 10, ty + 29, 0xFF501321);
+                g.fill(x + 9, ty - 8, x + 13, ty + 29, RED);
+            }
+            g.drawString(font, labels[i], x + 25, ty + 4, active ? 0xFFFFFFFF : MUTED, false);
+        }
+        g.drawString(font, "SETTINGS", x + 24, y + h - 56, MUTED, false);
+        g.drawString(font, "RIGHT SHIFT  •  CLOSE", x + 18, y + h - 28, 0xFF747783, false);
+
+        int cx = contentLeft();
+        int cw = contentWidth();
+        g.drawString(font, page.label + "  /  MODULES", cx, y + 91, RED, false);
         List<TitanModules.Entry> entries = TitanModules.ALL.stream()
-            .filter(entry -> entry.group().equals(page.name()))
+            .filter(e -> e.group().equals(page.name()))
             .toList();
 
+        int gap = 10;
+        int cardW = (cw - gap) / 2;
+        int rowH = 58;
         for (int i = 0; i < entries.size(); i++) {
             TitanModules.Entry entry = entries.get(i);
-            String state = TitanModules.isEnabled(entry.id()) ? "ON" : "OFF";
-            addRenderableWidget(Button.builder(
-                Component.literal(entry.name() + "  [" + state + "]"),
-                button -> {
-                    TitanModules.toggle(entry.id());
-                    rebuildWidgets();
-                }
-            ).bounds(contentLeft, top + 49 + i * 25, contentWidth, 20).build());
+            int col = i % 2;
+            int row = i / 2;
+            int bx = cx + col * (cardW + gap);
+            int by = y + 118 + row * (rowH + 8) - scroll;
+            if (by + rowH < y + 112 || by > y + h - 14) continue;
+            boolean enabled = TitanModules.isEnabled(entry.id());
+            boolean hover = mouseX >= bx && mouseX <= bx + cardW && mouseY >= by && mouseY <= by + rowH;
+            g.fill(bx, by, bx + cardW, by + rowH, hover ? 0xFF252630 : CARD);
+            g.fill(bx, by, bx + cardW, by + 1, 0xFF48202B);
+            g.drawString(font, entry.name(), bx + 12, by + 13, 0xFFF4F4F7, false);
+            g.drawString(font, "TITAN MODULE", bx + 12, by + 32, MUTED, false);
+            int sx = bx + cardW - 48;
+            int sy = by + 18;
+            g.fill(sx, sy, sx + 34, sy + 18, enabled ? RED : 0xFF555761);
+            g.fill(enabled ? sx + 18 : sx + 2, sy + 2, enabled ? sx + 32 : sx + 16, sy + 16, 0xFFFFFFFF);
         }
-
-        if (page == Page.UTILITY) {
-            addRenderableWidget(Button.builder(Component.literal("SAVE CURRENT POSITION AS WAYPOINT"),
-                button -> TitanModules.setWaypoint(Minecraft.getInstance()))
-                .bounds(contentLeft, top + 205, contentWidth, 20).build());
-        }
-
-        addRenderableWidget(Button.builder(Component.literal("CLOSE"), button -> onClose())
-            .bounds(contentLeft, top + panelHeight - 30, contentWidth, 20).build());
-    }
-
-    private Button tab(String label, Page target, int x, int y, int w) {
-        String shown = page == target ? "› " + label : label;
-        return Button.builder(Component.literal(shown), button -> {
-            page = target;
-            rebuildWidgets();
-        }).bounds(x, y, w, 20).build();
+        super.render(g, mouseX, mouseY, delta);
     }
 
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
-        int panelWidth = Math.min(410, width - 16);
-        int panelHeight = Math.min(285, height - 16);
-        int left = (width - panelWidth) / 2;
-        int top = (height - panelHeight) / 2;
-        int sideWidth = 104;
-
-        graphics.fill(0, 0, width, height, 0x99000000);
-        graphics.fill(left, top, left + panelWidth, top + panelHeight, 0xF014151B);
-        graphics.fill(left, top, left + panelWidth, top + 30, 0xFF861322);
-        graphics.fill(left, top + 30, left + sideWidth, top + panelHeight, 0xFF1B1C24);
-        graphics.fill(left + sideWidth, top + 30, left + sideWidth + 1, top + panelHeight, 0xFF8C1B2B);
-        graphics.drawString(font, "TITAN CLIENT  /  24 MODULES", left + 10, top + 11, 0xFFFFFFFF, false);
-        graphics.drawString(font, page.name(), left + sideWidth + 12, top + 36, 0xFFFF6677, false);
-        graphics.drawString(font, "RIGHT SHIFT", left + 10, top + panelHeight - 17, 0xFF888A96, false);
-        super.render(graphics, mouseX, mouseY, delta);
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (button != 0) return super.mouseClicked(mouseX, mouseY, button);
+        int x = left(), y = top(), h = panelHeight(), side = sideWidth();
+        for (int i = 0; i < Page.values().length; i++) {
+            int ty = y + 94 + i * 48;
+            if (mouseX >= x + 8 && mouseX <= x + side - 8 && mouseY >= ty && mouseY <= ty + 38) {
+                page = Page.values()[i];
+                scroll = 0;
+                return true;
+            }
+        }
+        int cx = contentLeft(), cw = contentWidth(), gap = 10;
+        int cardW = (cw - gap) / 2, rowH = 58;
+        List<TitanModules.Entry> entries = TitanModules.ALL.stream()
+            .filter(e -> e.group().equals(page.name())).toList();
+        for (int i = 0; i < entries.size(); i++) {
+            int col = i % 2, row = i / 2;
+            int bx = cx + col * (cardW + gap);
+            int by = y + 118 + row * (rowH + 8) - scroll;
+            if (mouseX >= bx && mouseX <= bx + cardW && mouseY >= by && mouseY <= by + rowH) {
+                TitanModules.toggle(entries.get(i).id());
+                if (entries.get(i).id().equals("waypoint")) TitanModules.setWaypoint(Minecraft.getInstance());
+                return true;
+            }
+        }
+        if (mouseX < x || mouseX > x + panelWidth() || mouseY < y || mouseY > y + h) onClose();
+        return true;
     }
 
     @Override
-    public boolean isPauseScreen() {
-        return false;
+    public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
+        int rows = (int) Math.ceil(TitanModules.ALL.stream().filter(e -> e.group().equals(page.name())).count() / 2.0);
+        int max = Math.max(0, rows * 66 - (panelHeight() - 145));
+        scroll = Math.max(0, Math.min(max, scroll - (int)(verticalAmount * 42)));
+        return true;
     }
+
+    @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (keyCode == 256 || keyCode == 344) {
+            onClose();
+            return true;
+        }
+        return super.keyPressed(keyCode, scanCode, modifiers);
+    }
+
+    @Override
+    public boolean isPauseScreen() { return false; }
 }

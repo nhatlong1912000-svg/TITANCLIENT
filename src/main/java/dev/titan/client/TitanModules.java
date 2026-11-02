@@ -23,21 +23,18 @@ public final class TitanModules {
         new Entry("direction", "Direction HUD", "HUD"),
         new Entry("clock", "Local Clock", "HUD"),
         new Entry("day", "World Day Counter", "HUD"),
-
         new Entry("health", "Health Display", "VISUAL"),
         new Entry("hunger", "Hunger Display", "VISUAL"),
         new Entry("armor", "Armor Status", "VISUAL"),
         new Entry("xp", "Experience Display", "VISUAL"),
         new Entry("held", "Held Item Display", "VISUAL"),
         new Entry("effects", "Status Effects Count", "VISUAL"),
-
         new Entry("speed", "Movement Speed", "PERFORMANCE"),
         new Entry("sprint", "Sprint Status", "PERFORMANCE"),
         new Entry("sneak", "Sneak Status", "PERFORMANCE"),
         new Entry("ground", "Ground Status", "PERFORMANCE"),
         new Entry("light", "Local Light Level", "PERFORMANCE"),
         new Entry("ping", "Network Ping", "PERFORMANCE"),
-
         new Entry("dimension", "Dimension Display", "UTILITY"),
         new Entry("keys", "Keystrokes HUD", "UTILITY"),
         new Entry("target_entity", "Target Entity Info", "UTILITY"),
@@ -48,7 +45,7 @@ public final class TitanModules {
 
     private static final Map<String, Boolean> ENABLED = new LinkedHashMap<>();
     private static BlockPos waypoint;
-    private static long sessionStart = System.currentTimeMillis();
+    private static final long sessionStart = System.currentTimeMillis();
 
     static {
         for (Entry entry : ALL) ENABLED.put(entry.id(), false);
@@ -83,7 +80,6 @@ public final class TitanModules {
     private static void renderHud(GuiGraphics graphics, net.minecraft.client.DeltaTracker tickCounter) {
         Minecraft client = Minecraft.getInstance();
         if (client.player == null || client.level == null || client.options.hideGui) return;
-
         int x = 8;
         int y = 8;
         for (Entry entry : ALL) {
@@ -126,7 +122,7 @@ public final class TitanModules {
                 var info = connection == null ? null : connection.getPlayerInfo(player.getUUID());
                 yield info == null ? "N/A" : info.getLatency() + " ms";
             }
-            case "dimension" -> level.dimension().location().toString();
+            case "dimension" -> level.dimension().identifier().toString();
             case "keys" -> "W:" + key(client.options.keyUp.isDown()) +
                 " A:" + key(client.options.keyLeft.isDown()) +
                 " S:" + key(client.options.keyDown.isDown()) +

@@ -10,7 +10,7 @@ import net.minecraft.network.chat.Component;
 
 public final class TitanClickGui extends Screen {
     private enum Page {
-        HUD("HUD"), VISUAL("VISUAL"), PERFORMANCE("PERFORMANCE"), UTILITY("UTILITY");
+        HUD("HUD"), VISUAL("VISUAL"), PERFORMANCE("PERFORMANCE"), UTILITY("UTILITY"), RAID("RAID");
         final String label;
         Page(String label) { this.label = label; }
     }
@@ -53,10 +53,10 @@ public final class TitanClickGui extends Screen {
         g.drawString(font, "✦", x + 18, y + 19, RED, false);
         g.drawString(font, "TITAN CLIENT", x + 42, y + 17, 0xFFFFFFFF, false);
         g.drawString(font, "BETTER  •  FASTER  •  STRONGER", x + 42, y + 37, 0xFFFF7183, false);
-        g.drawString(font, "24 MODULES", x + w - 104, y + 27, 0xFFB8BAC4, false);
+        g.drawString(font, "34 MODULES", x + w - 104, y + 27, 0xFFB8BAC4, false);
 
         Page[] pages = Page.values();
-        String[] labels = {"HUD", "VISUAL", "PERFORMANCE", "UTILITY"};
+        String[] labels = {"HUD", "VISUAL", "PERFORMANCE", "UTILITY", "RAID"};
         for (int i = 0; i < pages.length; i++) {
             int ty = y + 102 + i * 48;
             boolean active = page == pages[i];

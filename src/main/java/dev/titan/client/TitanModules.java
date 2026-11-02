@@ -148,15 +148,37 @@ public final class TitanModules {
             case "waypoint" -> waypoint == null ? "Not set" :
                 waypoint.getX() + ", " + waypoint.getY() + ", " + waypoint.getZ() +
                 String.format(" (%.1fm)", Math.sqrt(player.blockPosition().distSqr(waypoint)));
-            case "session" -> {
+            case "session", "raid_timer" -> {
                 long seconds = (System.currentTimeMillis() - sessionStart) / 1000L;
                 yield String.format("%02d:%02d:%02d", seconds / 3600, (seconds / 60) % 60, seconds % 60);
             }
+            case "durability" -> {
+                var stack = player.getMainHandItem();
+                yield stack.isEmpty() ? "Empty hand" : stack.isDamageableItem()
+                    ? (stack.getMaxDamage() - stack.getDamageValue()) + " / " + stack.getMaxDamage()
+                    : "Not damageable";
+            }
+            case "totems" -> Integer.toString(countItem(player, Items.TOTEM_OF_UNDYING));
+            case "crystals" -> Integer.toString(countItem(player, Items.END_CRYSTAL));
+            case "obsidian" -> Integer.toString(countItem(player, Items.OBSIDIAN));
+            case "pearls" -> Integer.toString(countItem(player, Items.ENDER_PEARL));
+            case "golden_apples" -> Integer.toString(countItem(player, Items.GOLDEN_APPLE) + countItem(player, Items.ENCHANTED_GOLDEN_APPLE));
+            case "shulkers" -> Integer.toString(countItem(player, Items.SHULKER_BOX));
+            case "rockets" -> Integer.toString(countItem(player, Items.FIREWORK_ROCKET));
+            case "arrows" -> Integer.toString(countItem(player, Items.ARROW));
             default -> "";
         };
     }
 
-    private static int countItem(net.minecraft.world.entity.player.Player player, Item item) {\n        int total = 0;\n        for (var stack : player.getInventory().items) {\n            if (stack.is(item)) total += stack.getCount();\n        }\n        return total;\n    }\n\n    private static String key(boolean down) {
+    private static int countItem(net.minecraft.world.entity.player.Player player, Item item) {
+        int total = 0;
+        for (var stack : player.getInventory().items) {
+            if (stack.is(item)) total += stack.getCount();
+        }
+        return total;
+    }
+
+    private static String key(boolean down) {
         return down ? "§a●" : "§7○";
     }
 }

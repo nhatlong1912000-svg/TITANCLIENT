@@ -172,7 +172,8 @@ public final class TitanModules {
 
     private static int countItem(net.minecraft.world.entity.player.Player player, Item item) {
         int total = 0;
-        for (var stack : player.getInventory().items) {
+        for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
+            var stack = player.getInventory().getItem(i);
             if (stack.is(item)) total += stack.getCount();
         }
         return total;

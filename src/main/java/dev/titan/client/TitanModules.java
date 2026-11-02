@@ -12,6 +12,8 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
 
 public final class TitanModules {
     public record Entry(String id, String name, String group) {}
@@ -40,7 +42,17 @@ public final class TitanModules {
         new Entry("target_entity", "Target Entity Info", "UTILITY"),
         new Entry("target_block", "Target Block Coordinates", "UTILITY"),
         new Entry("waypoint", "Personal Waypoint", "UTILITY"),
-        new Entry("session", "Session Timer", "UTILITY")
+        new Entry("session", "Session Timer", "UTILITY"),
+        new Entry("durability", "Tool Durability", "RAID"),
+        new Entry("totems", "Totem Counter", "RAID"),
+        new Entry("crystals", "End Crystal Counter", "RAID"),
+        new Entry("obsidian", "Obsidian Counter", "RAID"),
+        new Entry("pearls", "Ender Pearl Counter", "RAID"),
+        new Entry("golden_apples", "Golden Apple Counter", "RAID"),
+        new Entry("shulkers", "Shulker Box Counter", "RAID"),
+        new Entry("rockets", "Firework Counter", "RAID"),
+        new Entry("arrows", "Arrow Counter", "RAID"),
+        new Entry("raid_timer", "Raid Session Timer", "RAID")
     );
 
     private static final Map<String, Boolean> ENABLED = new LinkedHashMap<>();
@@ -144,7 +156,7 @@ public final class TitanModules {
         };
     }
 
-    private static String key(boolean down) {
+    private static int countItem(net.minecraft.world.entity.player.Player player, Item item) {\n        int total = 0;\n        for (var stack : player.getInventory().items) {\n            if (stack.is(item)) total += stack.getCount();\n        }\n        return total;\n    }\n\n    private static String key(boolean down) {
         return down ? "§a●" : "§7○";
     }
 }

@@ -32,7 +32,8 @@ public final class TitanModules {
         new Entry("held", "Held Item Display", "VISUAL"),
         new Entry("effects", "Status Effects Count", "VISUAL"),
         new Entry("speed", "Movement Speed", "PERFORMANCE"),
-        new Entry("sprint", "Sprint Status", "PERFORMANCE"),\n        new Entry("freecam", "Freecam", "UTILITY"),
+        new Entry("sprint", "Sprint Status", "PERFORMANCE"),
+        new Entry("freecam", "Freecam", "UTILITY"),
         new Entry("sneak", "Sneak Status", "PERFORMANCE"),
         new Entry("ground", "Ground Status", "PERFORMANCE"),
         new Entry("light", "Local Light Level", "PERFORMANCE"),
@@ -262,7 +263,8 @@ public final class TitanModules {
                 var info = connection == null ? null : connection.getPlayerInfo(player.getUUID());
                 yield info == null ? "N/A" : info.getLatency() + " ms";
             }
-            case "dimension" -> level.dimension().identifier().toString();\n            case "freecam" -> "Toggle available in singleplayer only";
+            case "dimension" -> level.dimension().identifier().toString();
+            case "freecam" -> "Toggle available in singleplayer only";
             case "keys" -> "W:" + key(client.options.keyUp.isDown()) +
                 " A:" + key(client.options.keyLeft.isDown()) +
                 " S:" + key(client.options.keyDown.isDown()) +
@@ -293,7 +295,15 @@ public final class TitanModules {
             case "golden_apples" -> Integer.toString(countItem(player, Items.GOLDEN_APPLE) + countItem(player, Items.ENCHANTED_GOLDEN_APPLE));
             case "shulkers" -> Integer.toString(countItem(player, Items.SHULKER_BOX));
             case "rockets" -> Integer.toString(countItem(player, Items.FIREWORK_ROCKET));
-            case "arrows" -> Integer.toString(countItem(player, Items.ARROW));\n            case "sus_chunk_finder" -> "Inhabited: " + level.getChunk(player.blockPosition()).getInhabitedTime();\n            case "base_finder" -> waypoint == null ? "Save a personal waypoint first" : "Waypoint " + waypoint.getX() + ", " + waypoint.getZ();\n            case "chunk_finder" -> { BlockPos p = player.blockPosition(); yield "Chunk " + (p.getX() >> 4) + ", " + (p.getZ() >> 4); }\n            case "amethyst_esp" -> {\n                long now = System.currentTimeMillis();\n                if (now - lastAmethystScan > 1000) { nearbyAmethystCount = countNearbyAmethyst(client); lastAmethystScan = now; }\n                yield nearbyAmethystCount + " nearby blocks";\n            }
+            case "arrows" -> Integer.toString(countItem(player, Items.ARROW));
+            case "sus_chunk_finder" -> "Inhabited: " + level.getChunk(player.blockPosition()).getInhabitedTime();
+            case "base_finder" -> waypoint == null ? "Save a personal waypoint first" : "Waypoint " + waypoint.getX() + ", " + waypoint.getZ();
+            case "chunk_finder" -> { BlockPos p = player.blockPosition(); yield "Chunk " + (p.getX() >> 4) + ", " + (p.getZ() >> 4); }
+            case "amethyst_esp" -> {
+                long now = System.currentTimeMillis();
+                if (now - lastAmethystScan > 1000) { nearbyAmethystCount = countNearbyAmethyst(client); lastAmethystScan = now; }
+                yield nearbyAmethystCount + " nearby blocks";
+            }
             default -> "";
         };
     }

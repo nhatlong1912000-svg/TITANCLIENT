@@ -33,7 +33,7 @@ public final class TitanModules {
         new Entry("held", "Held Item Display", "VISUAL"),
         new Entry("effects", "Status Effects Count", "VISUAL"),
         new Entry("speed", "Movement Speed", "PERFORMANCE"),
-        new Entry("sprint", "Sprint Status", "PERFORMANCE"),
+        new Entry("sprint", "Sprint Status", "PERFORMANCE"),\n        new Entry("freecam", "Freecam", "UTILITY"),
         new Entry("sneak", "Sneak Status", "PERFORMANCE"),
         new Entry("ground", "Ground Status", "PERFORMANCE"),
         new Entry("light", "Local Light Level", "PERFORMANCE"),
@@ -141,7 +141,7 @@ public final class TitanModules {
                 var info = connection == null ? null : connection.getPlayerInfo(player.getUUID());
                 yield info == null ? "N/A" : info.getLatency() + " ms";
             }
-            case "dimension" -> level.dimension().identifier().toString();
+            case "dimension" -> level.dimension().identifier().toString();\n            case "freecam" -> "Toggle available in singleplayer only";
             case "keys" -> "W:" + key(client.options.keyUp.isDown()) +
                 " A:" + key(client.options.keyLeft.isDown()) +
                 " S:" + key(client.options.keyDown.isDown()) +
@@ -172,12 +172,30 @@ public final class TitanModules {
             case "golden_apples" -> Integer.toString(countItem(player, Items.GOLDEN_APPLE) + countItem(player, Items.ENCHANTED_GOLDEN_APPLE));
             case "shulkers" -> Integer.toString(countItem(player, Items.SHULKER_BOX));
             case "rockets" -> Integer.toString(countItem(player, Items.FIREWORK_ROCKET));
-            case "arrows" -> Integer.toString(countItem(player, Items.ARROW));
+            case "arrows" -> Integer.toString(countItem(player, Items.ARROW));\n            case "sus_chunk_finder" -> "Inhabited: " + level.getChunk(player.blockPosition()).getInhabitedTime();\n            case "base_finder" -> waypoint == null ? "Save a personal waypoint first" : "Waypoint " + waypoint.getX() + ", " + waypoint.getZ();\n            case "chunk_finder" -> { BlockPos p = player.blockPosition(); yield "Chunk " + (p.getX() >> 4) + ", " + (p.getZ() >> 4); }\n            case "amethyst_esp" -> {\n                long now = System.currentTimeMillis();\n                if (now - lastAmethystScan > 1000) { nearbyAmethystCount = countNearbyAmethyst(client); lastAmethystScan = now; }\n                yield nearbyAmethystCount + " nearby blocks";\n            }
             default -> "";
         };
     }
 
-    private static int countNearbyAmethyst(Minecraft client) {\n        var player = client.player;\n        var level = client.level;\n        if (player == null || level == null) return 0;\n        BlockPos center = player.blockPosition();\n        int count = 0;\n        for (int x = -8; x <= 8; x++) {\n            for (int y = -8; y <= 8; y++) {\n                for (int z = -8; z <= 8; z++) {\n                    var state = level.getBlockState(center.offset(x, y, z));\n                    if (state.is(Blocks.AMETHYST_CLUSTER) || state.is(Blocks.SMALL_AMETHYST_BUD)\n                        || state.is(Blocks.MEDIUM_AMETHYST_BUD) || state.is(Blocks.LARGE_AMETHYST_BUD)) count++;\n                }\n            }\n        }\n        return count;\n    }\n\n    private static int countItem(net.minecraft.world.entity.player.Player player, Item item) {
+    private static int countNearbyAmethyst(Minecraft client) {
+        var player = client.player;
+        var level = client.level;
+        if (player == null || level == null) return 0;
+        BlockPos center = player.blockPosition();
+        int count = 0;
+        for (int x = -8; x <= 8; x++) {
+            for (int y = -8; y <= 8; y++) {
+                for (int z = -8; z <= 8; z++) {
+                    var state = level.getBlockState(center.offset(x, y, z));
+                    if (state.is(Blocks.AMETHYST_CLUSTER) || state.is(Blocks.SMALL_AMETHYST_BUD)
+                        || state.is(Blocks.MEDIUM_AMETHYST_BUD) || state.is(Blocks.LARGE_AMETHYST_BUD)) count++;
+                }
+            }
+        }
+        return count;
+    }
+
+    private static int countItem(net.minecraft.world.entity.player.Player player, Item item) {
         int total = 0;
         for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
             var stack = player.getInventory().getItem(i);

@@ -10,7 +10,9 @@ import net.minecraft.network.chat.Component;
 
 public final class TitanClickGui extends Screen {
     private enum Page {
-        HUD("HUD"), VISUAL("VISUAL"), PERFORMANCE("PERFORMANCE"), UTILITY("UTILITY"), RAID("RAID");
+        HUD("HUD"), VISUAL("VISUAL"), COMBAT("COMBAT"), MOVEMENT("MOVEMENT"),
+        WORLD("WORLD"), RENDER("RENDER"), PLAYER("PLAYER"), INVENTORY("INVENTORY"),
+        MISC("MISC"), PERFORMANCE("PERFORMANCE"), UTILITY("UTILITY"), RAID("RAID");
         final String label;
         Page(String label) { this.label = label; }
     }
@@ -56,15 +58,14 @@ public final class TitanClickGui extends Screen {
         g.drawString(font, TitanModules.ALL.size() + " MODULES", x + w - 104, y + 27, 0xFFB8BAC4, false);
 
         Page[] pages = Page.values();
-        String[] labels = {"HUD", "VISUAL", "PERFORMANCE", "UTILITY", "RAID"};
         for (int i = 0; i < pages.length; i++) {
-            int ty = y + 102 + i * 48;
+            int ty = y + 94 + i * 30;
             boolean active = page == pages[i];
             if (active) {
-                g.fill(x + 9, ty - 8, x + side - 10, ty + 29, 0xFF501321);
-                g.fill(x + 9, ty - 8, x + 13, ty + 29, RED);
+                g.fill(x + 9, ty - 4, x + side - 10, ty + 22, 0xFF501321);
+                g.fill(x + 9, ty - 4, x + 13, ty + 22, RED);
             }
-            g.drawString(font, labels[i], x + 25, ty + 4, active ? 0xFFFFFFFF : MUTED, false);
+            g.drawString(font, pages[i].label, x + 25, ty + 4, active ? 0xFFFFFFFF : MUTED, false);
         }
         g.drawString(font, "SETTINGS", x + 24, y + h - 56, MUTED, false);
         g.drawString(font, "RIGHT SHIFT  •  CLOSE", x + 18, y + h - 28, 0xFF747783, false);
@@ -107,8 +108,8 @@ public final class TitanClickGui extends Screen {
         if (event.button() != 0) return super.mouseClicked(event, doubleClick);
         int x = left(), y = top(), h = panelHeight(), side = sideWidth();
         for (int i = 0; i < Page.values().length; i++) {
-            int ty = y + 94 + i * 48;
-            if (mouseX >= x + 8 && mouseX <= x + side - 8 && mouseY >= ty && mouseY <= ty + 38) {
+            int ty = y + 90 + i * 30;
+            if (mouseX >= x + 8 && mouseX <= x + side - 8 && mouseY >= ty && mouseY <= ty + 30) {
                 page = Page.values()[i];
                 scroll = 0;
                 return true;

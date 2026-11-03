@@ -53,7 +53,7 @@ public final class TitanClickGui extends Screen {
         g.drawString(font, "✦", x + 18, y + 19, RED, false);
         g.drawString(font, "TITAN CLIENT", x + 42, y + 17, 0xFFFFFFFF, false);
         g.drawString(font, "BETTER  •  FASTER  •  STRONGER", x + 42, y + 37, 0xFFFF7183, false);
-        g.drawString(font, "34 MODULES", x + w - 104, y + 27, 0xFFB8BAC4, false);
+        g.drawString(font, TitanModules.ALL.size() + " MODULES", x + w - 104, y + 27, 0xFFB8BAC4, false);
 
         Page[] pages = Page.values();
         String[] labels = {"HUD", "VISUAL", "PERFORMANCE", "UTILITY", "RAID"};
@@ -124,7 +124,7 @@ public final class TitanClickGui extends Screen {
             int by = y + 118 + row * (rowH + 8) - scroll;
             if (mouseX >= bx && mouseX <= bx + cardW && mouseY >= by && mouseY <= by + rowH) {
                 TitanModules.toggle(entries.get(i).id());
-                if (entries.get(i).id().equals("waypoint")) TitanModules.setWaypoint(Minecraft.getInstance());
+                if ((entries.get(i).id().equals("waypoint") || entries.get(i).id().equals("base_finder"))) TitanModules.setWaypoint(Minecraft.getInstance());
                 return true;
             }
         }

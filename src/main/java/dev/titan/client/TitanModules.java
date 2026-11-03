@@ -14,6 +14,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.Blocks;
 
 public final class TitanModules {
     public record Entry(String id, String name, String group) {}
@@ -52,11 +53,17 @@ public final class TitanModules {
         new Entry("shulkers", "Shulker Box Counter", "RAID"),
         new Entry("rockets", "Firework Counter", "RAID"),
         new Entry("arrows", "Arrow Counter", "RAID"),
-        new Entry("raid_timer", "Raid Session Timer", "RAID")
+        new Entry("raid_timer", "Raid Session Timer", "RAID"),
+        new Entry("sus_chunk_finder", "Sus Chunk Finder", "RAID"),
+        new Entry("base_finder", "Base Finder", "RAID"),
+        new Entry("amethyst_esp", "Amethyst ESP", "RAID"),
+        new Entry("chunk_finder", "Chunk Finder", "RAID")
     );
 
     private static final Map<String, Boolean> ENABLED = new LinkedHashMap<>();
     private static BlockPos waypoint;
+    private static int nearbyAmethystCount;
+    private static long lastAmethystScan;
     private static final long sessionStart = System.currentTimeMillis();
 
     static {
@@ -170,7 +177,7 @@ public final class TitanModules {
         };
     }
 
-    private static int countItem(net.minecraft.world.entity.player.Player player, Item item) {
+    private static int countNearbyAmethyst(Minecraft client) {\n        var player = client.player;\n        var level = client.level;\n        if (player == null || level == null) return 0;\n        BlockPos center = player.blockPosition();\n        int count = 0;\n        for (int x = -8; x <= 8; x++) {\n            for (int y = -8; y <= 8; y++) {\n                for (int z = -8; z <= 8; z++) {\n                    var state = level.getBlockState(center.offset(x, y, z));\n                    if (state.is(Blocks.AMETHYST_CLUSTER) || state.is(Blocks.SMALL_AMETHYST_BUD)\n                        || state.is(Blocks.MEDIUM_AMETHYST_BUD) || state.is(Blocks.LARGE_AMETHYST_BUD)) count++;\n                }\n            }\n        }\n        return count;\n    }\n\n    private static int countItem(net.minecraft.world.entity.player.Player player, Item item) {
         int total = 0;
         for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
             var stack = player.getInventory().getItem(i);
